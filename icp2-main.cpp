@@ -93,11 +93,25 @@ vector<int> NN(PointCloudT::Ptr target, PointCloudT::Ptr source, Eigen::Matrix4d
 	// E.G. source index 0 -> target index 32, source index 1 -> target index 5, source index 2 -> target index 17, ... 
 
 	// TODO: create a KDtree with target as input
+	pcl::KdTreeFLANN<PointT> kdtree;
+	kdtree.setInputCloud(source);
 
 	// TODO: transform source by initTransform
+	PointCloutT::Ptr transformedSource = new PointCloutT();
+	pcl::transformPointCloud(*source, *transformedSource, initTransform);
 
 	// TODO loop through each transformed source point and using the KDtree find the transformed source point's nearest target point. Append the nearest point to associaitons 
-
+	for (PointT point in transformedSource->points) {
+		vector<int> pointIdxRadiusSearch;
+		vector<float> pointRadiusSquaredDistance;
+		result = kdtree.radiusSearch(point, dist, pointIdxRadiusSearch, pointRadiusSquaredDistance);
+		if (result < 0) {
+			associations.push_back(-1);
+		}
+		else {
+			associations.push_back(pointIdxRadiusSearch[0]);
+		}
+	}
 	return associations;
 }
 
